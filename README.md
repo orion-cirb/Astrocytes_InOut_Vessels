@@ -1,24 +1,25 @@
-# Vessel_IB4
+# Astrocytes_InOut_Vessels
 
 * **Developed for:** Katia
 * **Team:** Cohen-Salmon
-* **Date:** January 2023
+* **Date:** June 2023
 * **Software:** Fiji
 
 ### Images description
 
-3D images.
+3D images taken with a 40x objective.
 
-2 channels:
-  1. *Alexa Fluor 561:* RNA dots
-  2. *Alexa Fluor 642:* IB4 vessels
-
+3 channels:
+  1. *CSU 488:* Aldh-GFP/BacTRAP astrocytes
+  2. *CSU 561:* Iba1 microglia
+  3. *CSU 642:* IB4 vessels
 ### Plugin description
 
 * Detect vessels with LoG + thresholding
-* Detect RNA dots with DoG + thresholding
-* Find RNA dots in/out dilated vessels
-* Measure vessels volume + RNA dots volume and intensity in/out vessels
+* Detect microglia with median filtering + thresholding and fill them in black in vessels mask
+* Detect astrocytes with median filtering + thresholding
+* Find astrocytic objects in/out dilated vessels
+* Measure vessels volume + astrocytic objects volume in/out vessels
 * If ROI(s) provided, remove from the analysis vessels and RNA dots that are inside
 
 ### Dependencies
@@ -28,12 +29,4 @@
 
 ### Version history
 
-Version 1 released on January 19, 2023.
-
-Modified on March 22, 2023:
-  * Read nd/nd2 files
-  * Detect RNA dots with DoG + thresholding instead of Stardist
-  * Ask for RNA dots thresholding method in dialog box
-
-Modified on June 27, 2023:
-  * Corrected volume and intensity measurements given in results table
+Version 1 released on June 28, 2023.
