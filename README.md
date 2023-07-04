@@ -2,7 +2,7 @@
 
 * **Developed for:** Katia
 * **Team:** Cohen-Salmon
-* **Date:** June 2023
+* **Date:** July 2023
 * **Software:** Fiji
 
 ### Images description
@@ -29,4 +29,4 @@
 
 ### Version history
 
-Version 1 released on June 28, 2023.
+Version 1 released on July 4, 2023.
