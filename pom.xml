@@ -43,7 +43,7 @@
 	<properties>
                 <imagej.app.directory>/opt/Fiji.app/</imagej.app.directory>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<main-class>Vessel_IB4.jar</main-class>
+		<main-class>Astrocytes_InOut_Vessels</main-class>
 	</properties>
 
 	<dependencies>

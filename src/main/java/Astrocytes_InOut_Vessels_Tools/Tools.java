@@ -57,7 +57,7 @@ public class Tools {
     public double pixVol;
     
     // Microglia
-    private String microThMethod = "Otsu";
+    private String microThMethod = "Moments";
 
     // Vessels
     private String vesselThMethod = "Triangle";
@@ -314,30 +314,30 @@ public class Tools {
         ImagePlus imgMicroBin = threshold(imgMicroMed, microThMethod);
         Objects3DIntPopulation microgliaPop = new Objects3DIntPopulation(ImageHandler.wrap(imgMicroBin));
         
-        // Fill microglia in black in vessels image
-        ImageHandler imgVesselMask = ImageHandler.wrap(new Duplicator().run(imgVessel));
-        for (Object3DInt microglia: microgliaPop.getObjects3DInt()) 
-            microglia.drawObject(imgVesselMask, 0);
-        
         // Detect vessels
-        ImagePlus imgVesselLOG = imgVesselMask.getImagePlus();
+        ImagePlus imgVesselLOG = imgVessel.duplicate();
         IJ.run(imgVesselLOG, "Laplacian of Gaussian", "sigma=14 scale_normalised negate stack");
         ImagePlus imgVesselBin = threshold(imgVesselLOG, vesselThMethod);
         imgVesselBin.setCalibration(cal);
-        
-        // Fill ROIs in black
+               
+        // Fill ROIs in black in vessels image
         if (!rois.isEmpty())
             fillImg(imgVesselBin, rois);
         
+        // Fill microglia in black in vessels image
+        ImageHandler imgVesselBinH = ImageHandler.wrap(new Duplicator().run(imgVesselBin));
+        for (Object3DInt microglia: microgliaPop.getObjects3DInt()) 
+            microglia.drawObject(imgVesselBinH, 0);
+        
         // Vessels size filtering
-        Objects3DIntPopulation vesselsPop = getPopFromImage(imgVesselBin);
+        Objects3DIntPopulation vesselsPop = getPopFromImage(imgVesselBinH.getImagePlus());
         System.out.println("Nb vessels detected:"+vesselsPop.getNbObjects());
         popFilterSize(vesselsPop, minVesselVol, Double.MAX_VALUE);
         System.out.println("Nb vessels remaining after size filtering: "+ vesselsPop.getNbObjects());
         
         flushCloseImg(imgMicroMed);
         flushCloseImg(imgMicroBin);
-        flushCloseImg(imgVesselMask.getImagePlus());
+        flushCloseImg(imgVesselBinH.getImagePlus());
         flushCloseImg(imgVesselLOG);
         flushCloseImg(imgVesselBin);
         return(vesselsPop);
@@ -402,9 +402,9 @@ public class Tools {
         // Detect astrocytes
         ImagePlus imgBin = new Duplicator().run(imgAstro);
         IJ.run(imgBin, "Median...", "radius=2 stack");
-        IJ.run(imgBin, "Convert to Mask", "method=Li background=Dark calculate black");
+        IJ.run(imgBin, "Convert to Mask", "method="+astroThMethod+" background=Dark calculate black");
         imgBin.setCalibration(cal);
-        
+
         // Fill ROIs in black
         if (!rois.isEmpty()) {
             fillImg(imgBin, rois);
