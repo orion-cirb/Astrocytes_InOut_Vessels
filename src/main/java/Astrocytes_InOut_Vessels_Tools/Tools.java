@@ -52,9 +52,9 @@ public class Tools {
     private final String urlHelp = "https://github.com/orion-cirb/Astrocytes_InOut_Vessels.git";
     private CLIJ2 clij2 = CLIJ2.getInstance();
     
-    public String[] channelNames = {"Vessels", "Microglia", "Astrocytes"};
-    public Calibration cal;
-    public double pixVol;
+    private String[] channelNames = {"Vessels", "Microglia", "Astrocytes"};
+    private Calibration cal;
+    private double pixVol;
     
     // Microglia
     private String microThMethod = "Moments";
@@ -65,7 +65,7 @@ public class Tools {
     private int dilVessel = 2;
     
     // Astrocytes
-    private String astroThMethod = "Li";
+    public String astroThMethod = "Li";
     private double minAstroVol = 0.2;
 
     
@@ -425,23 +425,26 @@ public class Tools {
      * Find astrocytes into and out of vessels
      */
     public List<Objects3DIntPopulation> findAstroInOutVessels(Objects3DIntPopulation astrocytesPop, Objects3DIntPopulation vesselsPop, ImagePlus imgAstro) {
+        ImageHandler imhDilVessels = ImageHandler.wrap(imgAstro).createSameDimensions();
         ImageHandler imh = ImageHandler.wrap(imgAstro).createSameDimensions();
         astrocytesPop.drawInImage(imh);
         ImageHandler imhDup = imh.duplicate();
         
         for (Object3DInt vessel: vesselsPop.getObjects3DInt()) {
             Object3DInt vesselDil = dilateObj(vessel, imgAstro, dilVessel);
+            vesselDil.drawObject(imhDilVessels, vessel.getLabel());
             vesselDil.drawObject(imh, 0);
         }
-
-        Objects3DIntPopulation popOut = new Objects3DIntPopulation(imh);
         
+        Objects3DIntPopulation dilVesselsPop = new Objects3DIntPopulation(imhDilVessels);
+        Objects3DIntPopulation popOut = new Objects3DIntPopulation(imh);
         ImagePlus imgSub = new ImageCalculator().run("subtract stack create", imhDup.getImagePlus(), imh.getImagePlus());
         Objects3DIntPopulation popIn = new Objects3DIntPopulation(ImageHandler.wrap(imgSub));
         
+        imhDilVessels.closeImagePlus();
         imh.closeImagePlus();
         imhDup.closeImagePlus();
-        return(Arrays.asList(popIn, popOut));  
+        return(Arrays.asList(popIn, popOut, dilVesselsPop));  
     }
 
     
@@ -504,17 +507,19 @@ public class Tools {
     /**
      * Write results
      */
-    public void writeResults(BufferedWriter results, Objects3DIntPopulation vesselsPop, Objects3DIntPopulation astroIn, Objects3DIntPopulation astroOut, 
+    public void writeResults(BufferedWriter results, Objects3DIntPopulation vesselsPop, Objects3DIntPopulation dilVesselsPop, 
+            Objects3DIntPopulation astroIn, Objects3DIntPopulation astroOut, 
             ImagePlus imgAstro, ArrayList<Roi> rois, String imgName) throws IOException {
         
         double imgVol = imgAstro.getWidth() * imgAstro.getHeight() * imgAstro.getNSlices() * pixVol;
         double roisVol = getRoisVolume(rois, imgAstro);
         double vesselsVol = findPopVolume(vesselsPop);
+        double dilVesselsVol = findPopVolume(dilVesselsPop);
         
         double astroInVol = findPopVolume(astroIn);
         double astroOutVol = findPopVolume(astroOut);
         
-        results.write(imgName+"\t"+imgVol+"\t"+(imgVol-roisVol)+"\t"+vesselsVol+"\t"+astroInVol+"\t"+astroOutVol+"\t"+"\n");
+        results.write(imgName+"\t"+imgVol+"\t"+(imgVol-roisVol)+"\t"+vesselsVol+"\t"+dilVesselsVol+"\t"+astroInVol+"\t"+astroOutVol+"\n");
         results.flush();
     }
     

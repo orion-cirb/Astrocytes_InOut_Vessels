@@ -80,7 +80,7 @@ public class Astrocytes_InOut_Vessels implements PlugIn {
                 }
                 
                 // Create output folder
-                String outDirResults = imageDir + File.separator+ "Results"+ File.separator;
+                String outDirResults = imageDir + File.separator + "Results_" + tools.astroThMethod + File.separator;
                 File outDir = new File(outDirResults);
                 if (!Files.exists(Paths.get(outDirResults))) {
                     outDir.mkdir();
@@ -89,7 +89,7 @@ public class Astrocytes_InOut_Vessels implements PlugIn {
                 // Write header in results file
                 FileWriter fwResults = new FileWriter(outDirResults +"results.xls",false);
                 BufferedWriter results = new BufferedWriter(fwResults);
-                results.write("Image name\tImage vol (µm3)\tImage-ROI vol (µm3)\tVessels vol (µm3)\t"+
+                results.write("Image name\tImage vol (µm3)\tImage-ROI vol (µm3)\tVessels vol (µm3)\tDilated vessels vol (µm3)\t"+
                               "Astrocytes vol in vessels (µm3)\tAstrocytes vol out vessels (µm3)\n");
                 results.flush();
                 
@@ -137,13 +137,14 @@ public class Astrocytes_InOut_Vessels implements PlugIn {
                     List<Objects3DIntPopulation> astroInOutPops = tools.findAstroInOutVessels(astrocytesPop, vesselsPop, imgAstro);
                     Objects3DIntPopulation astroInPop = astroInOutPops.get(0);
                     Objects3DIntPopulation astroOutPop = astroInOutPops.get(1);
+                    Objects3DIntPopulation dilVesselsPop = astroInOutPops.get(2);
 
                     // Draw results
                     tools.print("- Drawing and writing results -");
                     tools.drawResults(imgAstro, vesselsPop, astroInPop, astroOutPop, outDirResults, rootName);
 
                     // Write results
-                    tools.writeResults(results, vesselsPop, astroInPop, astroOutPop, imgAstro, rois, rootName);
+                    tools.writeResults(results, vesselsPop, dilVesselsPop, astroInPop, astroOutPop, imgAstro, rois, rootName);
                     
                     tools.flushCloseImg(imgVessel);
                     tools.flushCloseImg(imgMicro);
